@@ -1,0 +1,1 @@
+<!-- använd om vi kör MySql -->
