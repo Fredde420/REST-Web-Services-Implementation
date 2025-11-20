@@ -1,17 +1,88 @@
 body {
     font-family: Arial, sans-serif;
-    background: #f3f3f3;
-    padding: 40px;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
     color: #333;
 }
 
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
 h1 {
-    color: #007acc;
     margin-bottom: 20px;
+    color: #005c99;
+}
+
+.card {
+    background-color: #ffffff;
+    border: 1px solid #dddddd;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+label {
+    display: flex;
+    flex-direction: column;
+    min-width: 200px;
+    font-size: 14px;
+}
+
+input[type="text"],
+input[type="date"],
+select {
+    padding: 6px;
+    margin-top: 4px;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
 }
 
 button {
-    padding: 10px 16px;
-    font-size: 16px;
+    padding: 8px 16px;
+    border: 1px solid #005c99;
+    background-color: #005c99;
+    color: #ffffff;
+    border-radius: 4px;
     cursor: pointer;
+}
+
+button:hover {
+    background-color: #004472;
+    border-color: #004472;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+}
+
+th,
+td {
+    padding: 8px;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: left;
+}
+
+.status {
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+.status.error {
+    color: #a00000;
+}
+
+.status.success {
+    color: #008000;
 }

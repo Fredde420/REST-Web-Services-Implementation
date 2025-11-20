@@ -1,19 +1,45 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-    <meta charset="UTF-8" />
-    <title>REST Web Services Test</title>
-    <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8">
+    <title>Registrera studieresultat</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>REST Web Services</h1>
+<div class="container">
+    <h1>Registrera studieresultat</h1>
 
-    <p>Detta är en minimal testsida. Om du ser denna text kör projektet korrekt.</p>
+    <section class="card">
+        <h2>1. Välj kurs och uppgift</h2>
+        <div class="row">
+            <label>
+                Kurskod
+                <input id="course_code" type="text" value="D0031N">
+            </label>
+            <label>
+                Uppgift
+                <input id="assignment" type="text" value="Inlämningsuppgift 1">
+            </label>
+            <button id="loadBtn">Hämta data</button>
+        </div>
+        <div id="load_status" class="status"></div>
+    </section>
 
-    <button id="testBtn">Testa JavaScript</button>
+    <section class="card">
+        <h2>2. Välj modul (Epok)</h2>
+        <select id="module_select">
+            <option value="">Hämta data först</option>
+        </select>
+    </section>
 
-    <p id="output"></p>
+    <section class="card">
+        <h2>3. Studenter och registrering</h2>
+        <div id="students_container"></div>
+        <button id="registerBtn">Registrera i Ladok</button>
+        <div id="register_status" class="status"></div>
+    </section>
+</div>
 
-    <script src="main.js"></script>
+<script src="main.js"></script>
 </body>
 </html>
