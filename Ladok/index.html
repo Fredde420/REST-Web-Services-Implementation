@@ -109,7 +109,7 @@
     if (el) el.classList.remove('hidden');
   }
 
-  // ------------------ LOGIN ------------------
+  // ------------------ LOGIN (via ladok/login.php + teachers.json) ------------------
   async function handleLogin(e) {
     e.preventDefault();
     const form = e.target;
@@ -124,27 +124,37 @@
     }
 
     try {
-      // 1) Hämta personnummer för användaren från studentits
-      const pnrData = await apiGet(`${API_BASE}/studentits/get_Persnummer.php`, {
-        username
+      // Anropa nya login.php som kollar teachers.json
+      const result = await apiPost(`${API_BASE}/ladok/login.php`, {
+        username,
+        password
       });
 
-      // 2) Faka fram en "user"-profil
+      if (!result.authenticated) {
+        msg.textContent = result.message || 'Ogiltigt användarnamn eller lösenord.';
+        currentUser = null;
+        updateProfileView();
+        return;
+      }
+
+      // Spara inloggad lärare
       currentUser = {
-        username,
-        personnummer: pnrData.personnummer,
+        username: result.username,
+        first_name: result.first_name,
+        last_name: result.last_name,
         role: 'lärare'
       };
 
-      msg.textContent = 'Inloggad!';
+      msg.textContent = `Inloggad som ${result.first_name} ${result.last_name}.`;
       updateProfileView();
+
       // hoppa till student-vyn
       showSection('students');
       // ladda lite default-data
       loadStudentsForDefaultCourse();
     } catch (err) {
       console.error(err);
-      msg.textContent = 'Kunde inte logga in (ogiltigt användarnamn?).';
+      msg.textContent = 'Fel vid inloggning.';
       currentUser = null;
       updateProfileView();
     }
@@ -158,7 +168,7 @@
     }
     profileDiv.innerHTML = `
       <p><strong>Användarnamn:</strong> ${currentUser.username}</p>
-      <p><strong>Personnummer:</strong> ${currentUser.personnummer}</p>
+      ${currentUser.first_name ? `<p><strong>Namn:</strong> ${currentUser.first_name} ${currentUser.last_name}</p>` : ''}
       <p><strong>Roll:</strong> ${currentUser.role}</p>
     `;
   }
