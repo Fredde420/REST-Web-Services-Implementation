@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Ladok</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+  <header class="topbar">
+    <h1>Ladok</h1>
+    <nav>
+      <button id="btn-students">Studenter</button>
+      <button id="btn-courses">Kurser</button>
+      <button id="btn-profile">Min profil</button>
+    </nav>
+</header>
+
+
+<main class="container">
+<section id="login" class="card">
+<h2>Logga in</h2>
+<form id="loginForm">
+  <label>Username <input name="username" required></label>
+  <label>Password <input name="password" type="password" required></label>
+  <button type="submit">Logga in</button>
+</form>
+  <p id="loginMsg" class="msg"></p>
+</section>
+
+
+<section id="students" class="card hidden">
+<h2>Studenter</h2>
+  <div class="toolbar">
+    <input id="search" placeholder="Sök namn eller id">
+    <button id="refresh">Uppdatera</button>
+  </div>
+<ul id="studentList" class="list"></ul>
+</section>
+
+
+<section id="studentDetail" class="card hidden">
+<button id="backToList" class="link">← Tillbaka</button>
+<h2 id="sd-name">Student</h2>
+<p><strong>ID:</strong> <span id="sd-id"></span></p>
+<p><strong>Program:</strong> <span id="sd-program"></span></p>
+
+
+<h3>Registrera kurs</h3>
+<form id="regForm">
+<label>Kurskod <input name="course_code" required></label>
+<button type="submit">Registrera</button>
+</form>
+<p id="regMsg" class="msg"></p>
+
+
+<h3>Registrerade kurser</h3>
+<ul id="enrolments" class="list"></ul>
+</section>
+
+
+<section id="courses" class="card hidden">
+<h2>Kurser</h2>
+<ul id="courseList" class="list"></ul>
+</section>
+
+
+<section id="profile" class="card hidden">
+<h2>Min profil</h2>
+<div id="profileContent">Du är inte inloggad.</div>
+</section>
+</main>
+
+
+<footer class="foot">Ladok</footer>
+
+
+<script>
+const api = 'api.php'; // endpoint
+let currentUser = null;
+let currentStudentId = null;
+
+// Helpers
+function qs(id) {
+  return document.getElementById(id);
+}
+function show(section) {
+  document.querySelectorAll('.card').forEach(c => c.classList.add('hidden'));
+  qs(section).classList.remove('hidden');
+}
+
+// Login
+qs('loginForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const data = Object.fromEntries(fd.entries());
+
+  const res = await fetch(api + '?action=login', {
+    method: 'POST',
+    body: JSON.stringify(data),
+    headers: { 'Content-Type': 'application/json' }
+  });
+
+  const j = await res.json();
+  qs('loginMsg').textContent = j.message || '';
+
+  if (j.ok) {
+    currentUser = j.user;
+    qs('profileContent').textContent = `Inloggad som ${j.user.username}`;
+    show('students');
+    loadStudents();
+  }
+});
+
+// Load students
+async function loadStudents(q = '') {
+  const res = await fetch(api + '?action=list_students&q=' + encodeURIComponent(q));
+  const j = await res.json();
+  const ul = qs('studentList');
+  ul.innerHTML = '';
+
+  j.forEach(s => {
+    const li = document.createElement('li');
+    li.className = 'list-item';
+    li.innerHTML = `<strong>${s.student_id}</strong> — ${s.name} <span class="muted">(${s.program})</span>`;
+    li.addEventListener('click', () => loadStudent(s.student_id));
+    ul.appendChild(li);
+  });
+}
+
+qs('refresh').addEventListener('click', () => loadStudents(qs('search').value));
+qs('search').addEventListener('input', e => loadStudents(e.target.value));
+
+// Load one student + enrolments
+async function loadStudent(id) {
+  const res = await fetch(api + '?action=get_student&id=' + encodeURIComponent(id));
+  const j = await res.json();
+  currentStudentId = id;
+
+  qs('sd-name').textContent = j.name;
+  qs('sd-id').textContent = j.student_id;
+  qs('sd-program').textContent = j.program;
+
+  const en = qs('enrolments');
+  en.innerHTML = '';
+
+  (j.enrolments || []).forEach(c => {
+    const li = document.createElement('li');
+    li.textContent = `${c.course_code} — ${c.title}`;
+    en.appendChild(li);
+  });
+
+  show('studentDetail');
+}
+
+qs('backToList').addEventListener('click', () => show('students'));
+
+// Register course
+qs('regForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!currentStudentId) {
+    qs('regMsg').textContent = 'Välj en student först';
+    return;
+  }
+
+  const fd = new FormData(e.target);
+  fd.append('student_id', currentStudentId);
+  const data = Object.fromEntries(fd.entries());
+
+  const res = await fetch(api + '?action=register_course', {
+    method: 'POST',
+    body: JSON.stringify(data),
+    headers: { 'Content-Type': 'application/json' }
+  });
+
+  const j = await res.json();
+  qs('regMsg').textContent = j.message || '';
+  if (j.ok) loadStudent(currentStudentId);
+});
+
+// Load courses
+async function loadCourses() {
+  const res = await fetch(api + '?action=list_courses');
+  const j = await res.json();
+  const ul = qs('courseList');
+  ul.innerHTML = '';
+
+  j.forEach(c => {
+    const li = document.createElement('li');
+    li.textContent = `${c.course_code} — ${c.title}`;
+    ul.appendChild(li);
+  });
+}
+
+// Navigation
+qs('btn-students').addEventListener('click', () => {
+  show('students');
+  loadStudents();
+});
+
+qs('btn-courses').addEventListener('click', () => {
+  show('courses');
+  loadCourses();
+});
+
+qs('btn-profile').addEventListener('click', () => show('profile'));
+
+// initial view
+show('login');
+</script>
+</body>
+</html>
