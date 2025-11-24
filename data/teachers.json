@@ -1,0 +1,44 @@
+[
+  {
+    "username": "professor_dusseldorf",
+    "password": "19500101-1111",
+    "first_name": "Professor",
+    "last_name": "Dusseldorf"
+  },
+  {
+    "username": "doktor_jekyll",
+    "password": "19620314-2222",
+    "first_name": "Doktor",
+    "last_name": "Jekyll"
+  },
+  {
+    "username": "mr_hyde",
+    "password": "19620314-3333",
+    "first_name": "Mr",
+    "last_name": "Hyde"
+  },
+  {
+    "username": "albin_smojd_johannesson",
+    "password": "19970405-4444",
+    "first_name": "Albin Smöjd",
+    "last_name": "Johannesson"
+  },
+  {
+    "username": "fredreik_smellyblad",
+    "password": "19940613-5555",
+    "first_name": "Fredreik",
+    "last_name": "Smellyblad"
+  },
+  {
+    "username": "oliver_magrutson",
+    "password": "19980202-6666",
+    "first_name": "Oliver",
+    "last_name": "Magrutson"
+  },
+  {
+    "username": "bosse_bosseson_bostrom",
+    "password": "19750109-7777",
+    "first_name": "Bosse Bosseson",
+    "last_name": "Boström"
+  }
+]
