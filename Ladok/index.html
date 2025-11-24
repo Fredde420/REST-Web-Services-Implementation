@@ -83,23 +83,23 @@
   let currentEnrolments = []; // lokala "registrerade kurser" per student
 
   // ------------------ HJÄLPFUNKTIONER ------------------
-  async function apiGet(path, params = {}) {
-    const url = new URL(path, window.location.origin);
-    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
-  }
+async function apiGet(path, params = {}) {
+  const query = new URLSearchParams(params).toString();
+  const url = `${path}?${query}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
 
-  async function apiPost(path, data) {
-    const res = await fetch(path, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
-  }
+async function apiPost(path, data) {
+  const res = await fetch(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
 
   function showSection(id) {
     document.querySelectorAll('main section').forEach(sec => {
