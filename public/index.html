@@ -13,12 +13,16 @@
         <h2>1. Välj kurs och uppgift</h2>
         <div class="row">
             <label>
-                Kurskod
-                <input id="course_code" type="text" value="D0031N">
+                Kurs
+                <select id="course_select">
+                    <option value="">Laddar kurser...</option>
+                </select>
             </label>
             <label>
                 Uppgift
-                <input id="assignment" type="text" value="Inlämningsuppgift 1">
+                <select id="assignment_select">
+                    <option value="">Välj kurs först</option>
+                </select>
             </label>
             <button id="loadBtn">Hämta data</button>
         </div>
