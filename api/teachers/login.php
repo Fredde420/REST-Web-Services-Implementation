@@ -4,7 +4,7 @@ require_once __DIR__ . '/../../config/data_store.php';
 header("Content-Type: application/json; charset=utf-8");
 
 /*
-Exempel request-body:
+Förväntad request-body (JSON):
 
 {
   "username": "professor_dusseldorf",
@@ -15,7 +15,6 @@ Exempel request-body:
 $input = json_decode(file_get_contents('php://input'), true);
 
 if (!is_array($input)) {
-    http_response_code(400);
     echo json_encode([
         'authenticated' => false,
         'message' => 'Invalid JSON'
@@ -27,7 +26,6 @@ $username = isset($input['username']) ? trim($input['username']) : '';
 $password = isset($input['password']) ? trim($input['password']) : '';
 
 if ($username === '' || $password === '') {
-    http_response_code(400);
     echo json_encode([
         'authenticated' => false,
         'message' => 'username and password are required'
@@ -35,26 +33,32 @@ if ($username === '' || $password === '') {
     exit;
 }
 
+// Lärare lagras i data/teachers.json
 $teachers = load_json('teachers.json');
 
 $found = null;
 
 foreach ($teachers as $t) {
-    if ($t['username'] === $username && $t['password'] === $password) {
+    if (
+        isset($t['username'], $t['password']) &&
+        $t['username'] === $username &&
+        $t['password'] === $password
+    ) {
         $found = $t;
         break;
     }
 }
 
+// Misslyckad inloggning → authenticated=false, men vi låter HTTP-koden vara 200
 if ($found === null) {
-    http_response_code(401);
     echo json_encode([
         'authenticated' => false,
-        'message' => 'Invalid username or password'
+        'message' => 'Ogiltigt användarnamn eller lösenord.'
     ]);
     exit;
 }
 
+// Lyckad inloggning
 echo json_encode([
     'authenticated' => true,
     'username' => $found['username'],
