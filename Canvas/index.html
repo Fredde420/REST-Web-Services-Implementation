@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Canvas Login</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<main class="container">
+
+<!-- LOGIN SECTION -->
+<section id="login-section" class="card">
+  <h2>Canvas Login</h2>
+  <form id="login-form">
+    <label>
+      Username
+      <input id="username" required />
+    </label>
+
+    <label>
+      Password (personnummer)
+      <input id="password" type="password" required />
+    </label>
+
+    <div class="actions">
+      <button type="submit">Login</button>
+    </div>
+
+    <p id="login-error" class="error"></p>
+  </form>
+</section>
+
+<!-- APP SECTION -->
+<section id="app-section" class="hidden">
+  <header class="app-header">
+    <h2 id="welcome"></h2>
+    <button id="logout">Logout</button>
+  </header>
+
+  <div class="card controls">
+    <label>
+      Choose course
+      <select id="course-select">
+        <option value="">— select —</option>
+      </select>
+    </label>
+
+    <label>
+      Choose assignment
+      <select id="assignment-select" disabled>
+        <option value="">— select —</option>
+      </select>
+    </label>
+  </div>
+
+  <!-- RESULTS SECTION -->
+  <section id="result-section" class="card hidden">
+    <h3>Assignment Results</h3>
+    <div id="result-info"></div>
+
+    <table id="results-table">
+      <thead>
+        <tr>
+          <th>Personnummer</th>
+          <th>Name</th>
+          <th>Course</th>
+          <th>Assignment</th>
+          <th>Grade</th>
+          <th>Date</th>
+          <th>Recorded</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+</section>
+
+</main>
+
+<script src="script.js" defer></script>
+</body>
+</html>
