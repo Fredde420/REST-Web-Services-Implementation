@@ -1,0 +1,50 @@
+[
+    {
+        "personnummer": "19980202-1122",
+        "course_code": "D0005N",
+        "modul_code": "0004",
+        "date": "2025-11-20",
+        "grade": "VG",
+        "created_at": "2025-11-20 16:24:55"
+    },
+    {
+        "personnummer": "19940613-2345",
+        "course_code": "D0005N",
+        "modul_code": "0004",
+        "date": "2025-11-20",
+        "grade": "VG",
+        "created_at": "2025-11-20 16:24:55"
+    },
+    {
+        "personnummer": "19940613-2345",
+        "course_code": "D0005N",
+        "modul_code": "0008",
+        "date": "2025-11-20",
+        "grade": "VG",
+        "created_at": "2025-11-20 16:24:59"
+    },
+    {
+        "personnummer": "19980202-1122",
+        "course_code": "D0005N",
+        "modul_code": "0008",
+        "date": "2025-11-20",
+        "grade": "VG",
+        "created_at": "2025-11-20 16:24:59"
+    },
+    {
+        "personnummer": "19970505-5566",
+        "course_code": "D0005N",
+        "modul_code": "0008",
+        "date": "2025-11-20",
+        "grade": "VG",
+        "created_at": "2025-11-20 16:25:34"
+    },
+    {
+        "personnummer": "19970505-5566",
+        "course_code": "D0005N",
+        "modul_code": "0004",
+        "date": "2025-11-20",
+        "grade": "VG",
+        "created_at": "2025-11-20 16:25:57"
+    }
+]
