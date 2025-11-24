@@ -109,7 +109,7 @@
     if (el) el.classList.remove('hidden');
   }
 
-  // ------------------ LOGIN (via ladok/login.php + teachers.json) ------------------
+  // ------------------ LOGIN (via teachers/login.php + teachers.json) ------------------
   async function handleLogin(e) {
     e.preventDefault();
     const form = e.target;
@@ -125,7 +125,7 @@
 
     try {
       // Anropa nya login.php som kollar teachers.json
-      const result = await apiPost(`${API_BASE}/ladok/login.php`, {
+      const result = await apiPost(`${API_BASE}/teachers/login.php`, {
         username,
         password
       });
