@@ -1,0 +1,170 @@
+:root {
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --accent: #224466;
+  --muted: #666666;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: #111111;
+}
+
+/* Topbar */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: linear-gradient(90deg, #ffffff, #eef2ff);
+  border-bottom: 1px solid #e0e6ef;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.topbar nav button {
+  margin-left: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.topbar nav button:hover {
+  background: #f1f5f9;
+}
+
+/* Layout */
+.container {
+  max-width: 980px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+/* Cards */
+.card {
+  background: var(--card);
+  padding: 16px;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(10, 10, 20, 0.06);
+  margin-bottom: 16px;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Lists */
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.list-item {
+  padding: 10px;
+  border-bottom: 1px solid #f0f2f6;
+  cursor: pointer;
+}
+
+.list-item:hover {
+  background: #fbfdff;
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.toolbar input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #dbe2f0;
+}
+
+/* Inputs & buttons */
+input,
+button {
+  font: inherit;
+}
+
+button {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background: var(--accent);
+  color: #ffffff;
+  cursor: pointer;
+}
+
+button:hover {
+  filter: brightness(1.05);
+}
+
+.link {
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 8px;
+}
+
+/* Text */
+.msg {
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+label input {
+  margin-top: 4px;
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #dbe2f0;
+}
+
+/* Footer */
+.foot {
+  text-align: center;
+  color: #888888;
+  padding: 12px;
+  font-size: 13px;
+}
+
+/* Responsivt: två kolumner på större skärmar */
+@media (min-width: 900px) {
+  .container {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 18px;
+  }
+
+  #login {
+    grid-column: 1 / -1;
+  }
+}
