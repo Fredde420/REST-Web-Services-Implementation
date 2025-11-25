@@ -1,6 +1,3 @@
-// ============================
-// Globala variabler
-// ============================
 const API_BASE = '../api';
 const DEFAULT_COURSE = 'D0031N';
 const DEFAULT_ASSIGNMENT = 'Inlämningsuppgift 1';
@@ -12,9 +9,6 @@ let currentStudents = [];
 let lastCourseCode = null;
 let lastAssignment = null;
 
-// ============================
-// Hjälpfunktioner
-// ============================
 function $(id) {
     return document.getElementById(id);
 }
@@ -45,9 +39,6 @@ function showSection(id) {
     if (el) el.classList.remove('hidden');
 }
 
-// ============================
-// LOGIN
-// ============================
 async function handleLogin(e) {
     e.preventDefault();
 
@@ -112,9 +103,6 @@ function updateProfileView() {
     `;
 }
 
-// ============================
-// STUDENTER
-// ============================
 async function loadStudents(courseCode, assignment) {
     const list = $('studentList');
     list.innerHTML = '<li class="list-item muted">Laddar...</li>';
@@ -219,9 +207,6 @@ function renderEnrolments() {
     });
 }
 
-// ============================
-// REGISTRERA RESULTAT
-// ============================
 async function handleRegisterCourse(e) {
     e.preventDefault();
     if (!currentStudent) return;
@@ -265,9 +250,6 @@ async function handleRegisterCourse(e) {
     }
 }
 
-// ============================
-// KURSER / MODULER (EPOK)
-// ============================
 async function loadCoursesView() {
     const list = $('courseList');
     list.innerHTML = '';
@@ -305,9 +287,6 @@ async function loadCoursesView() {
     }
 }
 
-// ============================
-// SÖKNING av studenter
-// ============================
 $('refresh').addEventListener('click', () => {
     const term = $('search').value.trim().toLowerCase();
 
@@ -347,9 +326,6 @@ $('refresh').addEventListener('click', () => {
     renderStudentList(filtered);
 });
 
-// ============================
-// INIT
-// ============================
 document.addEventListener('DOMContentLoaded', () => {
     $('loginForm').addEventListener('submit', handleLogin);
     $('regForm').addEventListener('submit', handleRegisterCourse);

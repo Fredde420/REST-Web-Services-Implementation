@@ -16,12 +16,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let results = [];
     let currentStudent = null;
 
-    // Normalize personnummer to avoid formatting issues
     function normalizePersonnummer(pnr) {
         return pnr.replace(/\s+/g, '');
     }
 
-    // Load students.json
     async function loadStudents() {
         try {
             students = await fetch("../data/students.json").then(r => r.json());
@@ -31,7 +29,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Load ladok_results.json
     async function loadResults() {
         try {
             results = await fetch("../data/ladok_results.json").then(r => r.json());
@@ -41,7 +38,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Populate courses for logged-in student
     function populateCourses() {
         courseSelect.innerHTML = '<option value="">— select —</option>';
         assignmentSelect.innerHTML = '<option value="">— select —</option>';
@@ -60,7 +56,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Show assignment results for logged-in student
     function showResultsFor(course, modul) {
         resultSection.classList.remove("hidden");
         resultInfo.textContent = `Course: ${course} — Assignment: ${modul}`;
@@ -91,7 +86,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Course dropdown change
     courseSelect.addEventListener("change", () => {
         const course = courseSelect.value;
         assignmentSelect.innerHTML = '<option value="">— select —</option>';
@@ -118,7 +112,6 @@ document.addEventListener("DOMContentLoaded", () => {
         assignmentSelect.disabled = assignments.length === 0;
     });
 
-    // Assignment dropdown change
     assignmentSelect.addEventListener("change", () => {
         const course = courseSelect.value;
         const modul = assignmentSelect.value;
@@ -126,14 +119,13 @@ document.addEventListener("DOMContentLoaded", () => {
         showResultsFor(course, modul);
     });
 
-    // Login form submit
     loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const username = document.getElementById("username").value.trim();
         const password = document.getElementById("password").value.trim();
 
-        await loadResults(); // ensure latest results
+        await loadResults(); 
 
         const student = students.find(
             s => s.username === username && normalizePersonnummer(s.personnummer) === normalizePersonnummer(password)
@@ -151,7 +143,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Logout
     logoutButton.addEventListener("click", () => {
         currentStudent = null;
         loginSection.classList.remove("hidden");
@@ -165,6 +156,5 @@ document.addEventListener("DOMContentLoaded", () => {
         resultsTableBody.innerHTML = "";
     });
 
-    // Initial load of students
     loadStudents();
 });

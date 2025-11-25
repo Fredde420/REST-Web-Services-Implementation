@@ -3,14 +3,6 @@ require_once __DIR__ . '/../../config/data_store.php';
 
 header("Content-Type: application/json; charset=utf-8");
 
-/*
-Förväntad request-body (JSON):
-
-{
-  "username": "professor_dusseldorf",
-  "password": "19500101-1111"
-}
-*/
 
 $input = json_decode(file_get_contents('php://input'), true);
 
@@ -33,7 +25,6 @@ if ($username === '' || $password === '') {
     exit;
 }
 
-// Lärare lagras i data/teachers.json
 $teachers = load_json('teachers.json');
 
 $found = null;
@@ -49,7 +40,6 @@ foreach ($teachers as $t) {
     }
 }
 
-// Misslyckad inloggning → authenticated=false, men vi låter HTTP-koden vara 200
 if ($found === null) {
     echo json_encode([
         'authenticated' => false,
@@ -58,7 +48,6 @@ if ($found === null) {
     exit;
 }
 
-// Lyckad inloggning
 echo json_encode([
     'authenticated' => true,
     'username' => $found['username'],
