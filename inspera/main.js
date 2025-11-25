@@ -25,17 +25,112 @@ function createElement(tag, attrs, children) {
     return el;
 }
 
-$("loadBtn").addEventListener("click", function () {
-    loadData();
+document.addEventListener("DOMContentLoaded", function () {
+    init();
 });
 
-$("registerBtn").addEventListener("click", function () {
-    registerResults();
-});
+function init() {
+    $("loadBtn").addEventListener("click", loadData);
+    $("registerBtn").addEventListener("click", registerResults);
+
+    loadCourses();
+
+    $("course_select").addEventListener("change", function () {
+        var course = this.value;
+        if (course) {
+            loadAssignments(course);
+        } else {
+            var assignmentSelect = $("assignment_select");
+            assignmentSelect.innerHTML = "";
+            var opt = document.createElement("option");
+            opt.value = "";
+            opt.textContent = "Välj kurs först";
+            assignmentSelect.appendChild(opt);
+        }
+    });
+}
+
+function loadCourses() {
+    var courseSelect = $("course_select");
+    courseSelect.innerHTML = '<option value="">Laddar kurser...</option>';
+
+    fetch("../api/courses/get_Courses.php")
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            courseSelect.innerHTML = "";
+            if (!data.courses || data.courses.length === 0) {
+                var opt = document.createElement("option");
+                opt.value = "";
+                opt.textContent = "Inga kurser hittades";
+                courseSelect.appendChild(opt);
+                return;
+            }
+
+            var defaultOpt = document.createElement("option");
+            defaultOpt.value = "";
+            defaultOpt.textContent = "Välj kurs";
+            courseSelect.appendChild(defaultOpt);
+
+            data.courses.forEach(function (c) {
+                var opt = document.createElement("option");
+                opt.value = c.code;
+                opt.textContent = c.code;
+                courseSelect.appendChild(opt);
+            });
+        })
+        .catch(function (error) {
+            console.error(error);
+            courseSelect.innerHTML = "";
+            var opt = document.createElement("option");
+            opt.value = "";
+            opt.textContent = "Fel vid hämtning av kurser";
+            courseSelect.appendChild(opt);
+        });
+}
+
+function loadAssignments(courseCode) {
+    var assignmentSelect = $("assignment_select");
+    assignmentSelect.innerHTML = '<option value="">Laddar uppgifter...</option>';
+
+    var url = "../api/courses/get_Assignments.php?course_code=" + encodeURIComponent(courseCode);
+
+    fetch(url)
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            assignmentSelect.innerHTML = "";
+            if (!data.assignments || data.assignments.length === 0) {
+                var opt = document.createElement("option");
+                opt.value = "";
+                opt.textContent = "Inga uppgifter hittades";
+                assignmentSelect.appendChild(opt);
+                return;
+            }
+
+            var defaultOpt = document.createElement("option");
+            defaultOpt.value = "";
+            defaultOpt.textContent = "Välj uppgift";
+            assignmentSelect.appendChild(defaultOpt);
+
+            data.assignments.forEach(function (a) {
+                var opt = document.createElement("option");
+                opt.value = a.name;
+                opt.textContent = a.name;
+                assignmentSelect.appendChild(opt);
+            });
+        })
+        .catch(function (error) {
+            console.error(error);
+            assignmentSelect.innerHTML = "";
+            var opt = document.createElement("option");
+            opt.value = "";
+            opt.textContent = "Fel vid hämtning av uppgifter";
+            assignmentSelect.appendChild(opt);
+        });
+}
 
 function loadData() {
-    var course = $("course_code").value.trim();
-    var assignment = $("assignment").value.trim();
+    var course = $("course_select").value;
+    var assignment = $("assignment_select").value;
     var status = $("load_status");
     var moduleSelect = $("module_select");
     var studentsContainer = $("students_container");
@@ -46,7 +141,7 @@ function loadData() {
     moduleSelect.innerHTML = '<option value="">Laddar moduler...</option>';
 
     if (!course || !assignment) {
-        status.textContent = "Ange kurskod och uppgift.";
+        status.textContent = "Välj kurs och uppgift.";
         status.className = "status error";
         return;
     }
@@ -123,13 +218,12 @@ function loadData() {
 
                 var personnummerSpan = createElement("span", null, ["Laddar..."]);
 
-                var tr = row;
-                tr.appendChild(createElement("td", null, [s.first_name + " " + s.last_name]));
-                tr.appendChild(createElement("td", null, [s.username]));
-                tr.appendChild(createElement("td", null, [personnummerSpan]));
-                tr.appendChild(createElement("td", null, [dateInput]));
-                tr.appendChild(createElement("td", null, [gradeSelect]));
-                tbody.appendChild(tr);
+                row.appendChild(createElement("td", null, [s.first_name + " " + s.last_name]));
+                row.appendChild(createElement("td", null, [s.username]));
+                row.appendChild(createElement("td", null, [personnummerSpan]));
+                row.appendChild(createElement("td", null, [dateInput]));
+                row.appendChild(createElement("td", null, [gradeSelect]));
+                tbody.appendChild(row);
 
                 var url = "../api/studentits/get_Persnummer.php?username=" + encodeURIComponent(s.username);
                 var p = fetch(url)
@@ -169,7 +263,7 @@ function loadData() {
 }
 
 function registerResults() {
-    var course = $("course_code").value.trim();
+    var course = $("course_select").value;
     var moduleCode = $("module_select").value;
     var status = $("register_status");
 
@@ -177,7 +271,7 @@ function registerResults() {
     status.className = "status";
 
     if (!course) {
-        status.textContent = "Ange kurskod.";
+        status.textContent = "Välj en kurs.";
         status.className = "status error";
         return;
     }
@@ -197,8 +291,6 @@ function registerResults() {
     var payloads = [];
 
     rows.forEach(function (row) {
-        var usernameCell = row.cells[1];
-        var personnummerCell = row.cells[2];
         var dateInput = row.cells[3].querySelector("input[type='date']");
         var gradeSelect = row.cells[4].querySelector("select");
 
