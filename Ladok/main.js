@@ -1,12 +1,25 @@
+// ============================
+// Globala variabler
+// ============================
 const API_BASE = '../api';
+const DEFAULT_COURSE = 'D0031N';
+const DEFAULT_ASSIGNMENT = 'Inlämningsuppgift 1';
 
 let currentUser = null;
 let currentStudent = null;
 let currentEnrolments = [];
+let currentStudents = [];
+let lastCourseCode = null;
+let lastAssignment = null;
 
-// ------------------ HJÄLPFUNKTIONER ------------------
+// ============================
+// Hjälpfunktioner
+// ============================
+function $(id) {
+    return document.getElementById(id);
+}
+
 async function apiGet(path, params = {}) {
-    // använd full URL baserat på nuvarande sida
     const url = new URL(path, window.location.href);
     Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
     const res = await fetch(url);
@@ -32,14 +45,19 @@ function showSection(id) {
     if (el) el.classList.remove('hidden');
 }
 
-// ------------------ LOGIN ------------------
+// ============================
+// LOGIN
+// ============================
 async function handleLogin(e) {
     e.preventDefault();
+
     const form = e.target;
     const username = form.username.value.trim();
     const password = form.password.value.trim();
-    const msg = document.getElementById('loginMsg');
+    const msg = $('loginMsg');
     msg.textContent = '';
+
+    console.log('Login attempt:', { username });
 
     if (!username || !password) {
         msg.textContent = 'Fyll i både användarnamn och lösenord.';
@@ -51,6 +69,8 @@ async function handleLogin(e) {
             username,
             password
         });
+
+        console.log('Login response:', result);
 
         if (!result.authenticated) {
             msg.textContent = result.message || 'Ogiltigt användarnamn eller lösenord.';
@@ -80,22 +100,29 @@ async function handleLogin(e) {
 }
 
 function updateProfileView() {
-    const profileDiv = document.getElementById('profileContent');
+    const profileDiv = $('profileContent');
     if (!currentUser) {
         profileDiv.textContent = 'Du är inte inloggad.';
         return;
     }
     profileDiv.innerHTML = `
-      <p><strong>Användarnamn:</strong> ${currentUser.username}</p>
-      ${currentUser.first_name ? `<p><strong>Namn:</strong> ${currentUser.first_name} ${currentUser.last_name}</p>` : ''}
-      <p><strong>Roll:</strong> ${currentUser.role}</p>
+        <p><strong>Användarnamn:</strong> ${currentUser.username}</p>
+        <p><strong>Namn:</strong> ${currentUser.first_name} ${currentUser.last_name}</p>
+        <p><strong>Roll:</strong> ${currentUser.role}</p>
     `;
 }
 
-// ------------------ STUDENTER ------------------
+// ============================
+// STUDENTER
+// ============================
 async function loadStudents(courseCode, assignment) {
-    const list = document.getElementById('studentList');
+    const list = $('studentList');
     list.innerHTML = '<li class="list-item muted">Laddar...</li>';
+
+    lastCourseCode = courseCode;
+    lastAssignment = assignment;
+
+    console.log(`Hämtar studenter: course=${courseCode}, assignment=${assignment}`);
 
     try {
         const data = await apiGet(`${API_BASE}/canvas/get_students.php`, {
@@ -103,61 +130,82 @@ async function loadStudents(courseCode, assignment) {
             assignment: assignment
         });
 
-        const students = data.students || [];
-        if (!students.length) {
-            list.innerHTML = '<li class="list-item muted">Inga studenter hittades.</li>';
-            return;
-        }
+        console.log('Studentdata mottagen:', data);
 
-        list.innerHTML = '';
-        students.forEach(s => {
-            const li = document.createElement('li');
-            li.className = 'list-item';
-            const name = s.name || `${s.first_name || ''} ${s.last_name || ''}`.trim();
-            const id = s.personnummer || s.id || '';
-            li.textContent = name + (id ? ` (${id})` : '');
-            li.addEventListener('click', () => {
-                openStudentDetail(
-                    {
-                        name: name,
-                        personnummer: s.personnummer || '',
-                        program: s.program || s.programme || ''
-                    },
-                    courseCode
-                );
-            });
-            list.appendChild(li);
-        });
+        currentStudents = data.students || [];
+        renderStudentList(currentStudents);
     } catch (err) {
         console.error(err);
         list.innerHTML = '<li class="list-item muted">Fel vid hämtning av studenter.</li>';
     }
 }
 
-function loadStudentsForDefaultCourse() {
-    const defaultCourse = 'DV001';
-    const defaultAssignment = 'Lab1';
-    loadStudents(defaultCourse, defaultAssignment);
+function renderStudentList(students) {
+    const list = $('studentList');
+
+    if (!students || students.length === 0) {
+        list.innerHTML = '<li class="list-item muted">Inga studenter hittades.</li>';
+        return;
+    }
+
+    list.innerHTML = '';
+
+    students.forEach(s => {
+        const li = document.createElement('li');
+        li.className = 'list-item';
+
+        const firstName = s.first_name || s.fname || '';
+        const lastName = s.last_name || s.lname || '';
+        const name = `${firstName} ${lastName}`.trim();
+        const username = s.username || '';
+        const personnummer = s.personnummer || s.id || '';
+
+        const displayName = name || username || 'Okänt namn';
+
+        li.textContent =
+            displayName +
+            (username ? ` (${username})` : '') +
+            (personnummer ? ` – ${personnummer}` : '');
+
+        li.addEventListener('click', () => {
+            openStudentDetail(
+                {
+                    name: displayName,
+                    personnummer: personnummer,
+                    program: s.program || s.programme || ''
+                }
+            );
+        });
+
+        list.appendChild(li);
+    });
 }
 
-function openStudentDetail(student, courseCode) {
-    currentStudent = { ...student, course_code: courseCode };
+function loadStudentsForDefaultCourse() {
+    loadStudents(DEFAULT_COURSE, DEFAULT_ASSIGNMENT);
+}
+
+function openStudentDetail(student) {
+    currentStudent = {
+        name: student.name || '',
+        personnummer: student.personnummer || '',
+        program: student.program || '',
+        course_code: lastCourseCode || DEFAULT_COURSE
+    };
     currentEnrolments = [];
 
-    document.getElementById('sd-name').textContent = student.name || '';
-    document.getElementById('sd-id').textContent =
-        student.personnummer || student.id || '';
-    document.getElementById('sd-program').textContent =
-        student.program || student.programme || '-';
+    $('sd-name').textContent = currentStudent.name || '';
+    $('sd-id').textContent = currentStudent.personnummer || '';
+    $('sd-program').textContent = currentStudent.program || '-';
 
-    document.getElementById('regMsg').textContent = '';
-    document.getElementById('enrolments').innerHTML = '';
+    $('regMsg').textContent = '';
+    $('enrolments').innerHTML = '';
 
     showSection('studentDetail');
 }
 
 function renderEnrolments() {
-    const ul = document.getElementById('enrolments');
+    const ul = $('enrolments');
     if (!currentEnrolments.length) {
         ul.innerHTML = '<li class="list-item muted">Inga registrerade kurser än.</li>';
         return;
@@ -171,15 +219,20 @@ function renderEnrolments() {
     });
 }
 
-// ------------------ REGISTRERA KURS/RESULTAT ------------------
+// ============================
+// REGISTRERA RESULTAT
+// ============================
 async function handleRegisterCourse(e) {
     e.preventDefault();
     if (!currentStudent) return;
 
     const form = e.target;
-    const courseCode = form.course_code.value.trim();
-    const msg = document.getElementById('regMsg');
+    const courseCodeInput = form.course_code.value.trim();
+    const courseCode = courseCodeInput || currentStudent.course_code || DEFAULT_COURSE;
+    const msg = $('regMsg');
     msg.textContent = '';
+
+    console.log('Registrerar resultat för:', currentStudent);
 
     if (!courseCode) {
         msg.textContent = 'Ange kurskod.';
@@ -196,6 +249,8 @@ async function handleRegisterCourse(e) {
 
     try {
         const res = await apiPost(`${API_BASE}/ladok/reg_Resultat.php`, payload);
+        console.log('Registreringssvar:', res);
+
         if (res.status === 'registrerad') {
             msg.textContent = 'Kurs/resultat registrerat i mock-Ladok.';
             currentEnrolments.push(payload);
@@ -210,21 +265,27 @@ async function handleRegisterCourse(e) {
     }
 }
 
-// ------------------ KURSER / MODULER ------------------
+// ============================
+// KURSER / MODULER (EPOK)
+// ============================
 async function loadCoursesView() {
-    const list = document.getElementById('courseList');
+    const list = $('courseList');
     list.innerHTML = '';
 
-    const courseCode = prompt('Ange kurskod för att hämta moduler (EPOK):');
+    const courseCode = prompt('Ange kurskod för att hämta moduler (EPOK):', DEFAULT_COURSE);
     if (!courseCode) {
         list.innerHTML = '<li class="list-item muted">Ingen kurskod angiven.</li>';
         return;
     }
 
+    console.log('Hämtar EPOK-moduler för:', courseCode);
+
     try {
         const data = await apiGet(`${API_BASE}/epok/get_Modul.php`, {
             course_code: courseCode
         });
+
+        console.log('Epok-svar:', data);
 
         const modules = data.modules || [];
         if (!modules.length) {
@@ -244,50 +305,73 @@ async function loadCoursesView() {
     }
 }
 
-// ------------------ INIT & NAVIGATION ------------------
+// ============================
+// SÖKNING av studenter
+// ============================
+$('refresh').addEventListener('click', () => {
+    const term = $('search').value.trim().toLowerCase();
+
+    console.log('Sökterm:', term);
+
+    if (!currentStudents || currentStudents.length === 0) {
+        console.log('Inga studenter laddade ännu — hämtar standardkurs.');
+        loadStudentsForDefaultCourse();
+        return;
+    }
+
+    if (!term) {
+        console.log('Tom sökterm — visar alla studenter.');
+        renderStudentList(currentStudents);
+        return;
+    }
+
+    const filtered = currentStudents.filter(s => {
+        const firstName = s.first_name || s.fname || '';
+        const lastName = s.last_name || s.lname || '';
+        const name = `${firstName} ${lastName}`.toLowerCase();
+        const username = (s.username || '').toLowerCase();
+        const pnr = (s.personnummer || s.id || '').toLowerCase();
+        return name.includes(term) || username.includes(term) || pnr.includes(term);
+    });
+
+    console.log(`Antal matchande studenter: ${filtered.length}`);
+    filtered.forEach((s, i) => {
+        const firstName = s.first_name || s.fname || '';
+        const lastName = s.last_name || s.lname || '';
+        const name = `${firstName} ${lastName}`.trim();
+        const username = s.username || '';
+        const pnr = s.personnummer || s.id || '';
+        console.log(`Match ${i + 1}:`, { namn: name, username: username, personnummer: pnr });
+    });
+
+    renderStudentList(filtered);
+});
+
+// ============================
+// INIT
+// ============================
 document.addEventListener('DOMContentLoaded', () => {
-    document
-        .getElementById('loginForm')
-        .addEventListener('submit', handleLogin);
+    $('loginForm').addEventListener('submit', handleLogin);
+    $('regForm').addEventListener('submit', handleRegisterCourse);
 
-    document
-        .getElementById('regForm')
-        .addEventListener('submit', handleRegisterCourse);
-
-    document.getElementById('backToList').addEventListener('click', () => {
+    $('backToList').addEventListener('click', () => {
         showSection('students');
     });
 
-    document.getElementById('btn-students').addEventListener('click', () => {
+    $('btn-students').addEventListener('click', () => {
         showSection('students');
-        if (currentUser) {
+        if (currentUser && currentStudents.length === 0) {
             loadStudentsForDefaultCourse();
         }
     });
 
-    document.getElementById('btn-courses').addEventListener('click', () => {
+    $('btn-courses').addEventListener('click', () => {
         showSection('courses');
         loadCoursesView();
     });
 
-    document.getElementById('btn-profile').addEventListener('click', () => {
+    $('btn-profile').addEventListener('click', () => {
         showSection('profile');
         updateProfileView();
-    });
-
-    document.getElementById('refresh').addEventListener('click', () => {
-        const search = document.getElementById('search').value.trim();
-        if (!search.includes(',')) {
-            alert('Ange "kurskod,uppgift" i sökfältet, t.ex. "DV001,Lab1".');
-            return;
-        }
-        const parts = search.split(',').map(s => s.trim());
-        const course = parts[0];
-        const assignment = parts[1];
-        if (!course || !assignment) {
-            alert('Ange både kurskod och uppgiftsnamn t.ex. "DV001,Lab1".');
-            return;
-        }
-        loadStudents(course, assignment);
     });
 });
